@@ -1,0 +1,170 @@
+#include "ShotSegmentation.hpp"
+
+ShotSegmentation::ShotSegmentation(vector<Mat> histograms, int heuristicThreshold, double intersectionThreshold, double euclideanThreshold) {
+	this->histograms = histograms;
+	this->intersectionThreshold = intersectionThreshold;
+	this->euclideanThreshold = euclideanThreshold;
+	this->heuristicThreshold = heuristicThreshold;
+}
+
+double ShotSegmentation::histogramEuclideanDistance(Mat histogram1, Mat histogram2) {
+	double distance = 0.0;
+	for(int h = 0; h < 8; h++) {
+		for(int s = 0; s < 4; s++) {
+			for(int v = 0; v < 4; v++) {
+				float val1 = histogram1.at<float>(h,s,v);
+				float val2 = histogram2.at<float>(h,s,v);
+				distance = distance + sqrt(pow(val1-val2,2.0));
+			}
+		}
+	}
+	return distance;
+}
+
+double ShotSegmentation::histogramIntersectionDistance(Mat histogram1, Mat histogram2) {
+	return compareHist(histogram1, histogram2, CV_COMP_INTERSECT);
+}
+
+double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pair<int,int> window) {
+	double maxVal, minVal, avgVal;
+	
+	maxVal = distances[window.first];
+	minVal = distances[window.first];
+	avgVal = distances[window.first];
+	
+	for(int i = window.first+1; i < window.second; i++) {
+		maxVal = max(maxVal,distances[i]);
+		minVal = min(minVal,distances[i]);
+		avgVal = avgVal + distances[i];
+	}
+	avgVal = avgVal / (double) (window.second - window.first);
+	if(minVal * 1.15 >= avgVal && avgVal >= maxVal * 0.95) {
+		return 0.4;
+	}
+	return avgVal * intersectionThreshold;
+}
+
+double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
+	double maxVal, minVal, avgVal;
+	
+	maxVal = distances[window.first];
+	minVal = distances[window.first];
+	avgVal = distances[window.first];
+	
+	for(int i = window.first+1; i < window.second; i++) {
+		maxVal = max(maxVal,distances[i]);
+		minVal = min(minVal,distances[i]);
+		avgVal = avgVal + distances[i];
+	}
+	avgVal = avgVal / (double) (window.second - window.first);
+	if(minVal * 1.5 >= avgVal && avgVal >= maxVal * 0.75) {
+		return 1;
+	}
+	return avgVal * euclideanThreshold;
+}
+
+bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {
+	for(int i = pos; i < pos+this->heuristicThreshold && i < distances.size(); i++) {
+		if(distances[i] < threshold) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ShotSegmentation::heuristicEuclidean(vector<double> distances, int pos, double threshold) {
+	for(int i = pos; i < pos+this->heuristicThreshold && i < distances.size(); i++) {
+		if(distances[i] > threshold) {
+			return true;
+		}
+	}
+	return false;
+}
+
+vector< pair<int,int> > ShotSegmentation::segmentSlidingWindows(vector<double> distEuclidean, vector<double> distIntersec, double thresholdIntersec, double thresholdEuclidean, pair<int,int> window) {
+	int i, j, ant;
+	vector< pair<int,int> > shots;
+	for(ant = window.first, i = window.first, j = 0; i < window.second; i++) {
+		if(distIntersec[i] <= thresholdIntersec || distEuclidean[i] >= thresholdEuclidean) {
+			j++;
+		} else {
+			if (j > 0) {
+				if(heuristicIntersec(distIntersec, i, thresholdIntersec) || heuristicEuclidean(distEuclidean, i, thresholdEuclidean)) {
+					j++;
+				} else {
+					if (j >= 1) {
+						shots.push_back(make_pair(ant,i - j));
+						ant = i - j + 1;
+					}
+					j = 0;
+				}
+			}
+		}
+	}
+	shots.push_back(make_pair(ant,window.second));
+	return shots;
+}
+
+vector< pair<int,int> > ShotSegmentation::segment() {
+	vector<double> distEuclidean, distIntersec, thresholdIntersec, thresholdEuclidean;	
+	vector<double>::iterator maxVal, minVal;
+	int previousPos = 0;
+	vector<pair<int,int> > slidingWindow;
+	pair<int,int> window;
+	
+	/* Calculate the distances between consecutive histograms*/
+	for(int i = 1; i < this->histograms.size(); i++) {
+		distEuclidean.push_back(this->histogramEuclideanDistance(this->histograms[i-1],this->histograms[i]));
+		distIntersec.push_back(this->histogramIntersectionDistance(this->histograms[i-1],this->histograms[i]));
+	}
+
+	/* Find the max and min distances among the histograms */
+	maxVal = max_element(distEuclidean.begin(), distEuclidean.end());
+	minVal = min_element(distIntersec.begin(), distIntersec.end());
+	
+	/* Generate the sliding windows and its threholds */
+	int i;
+	for(i = 0; i < distIntersec.size(); i++) {
+		if(distIntersec[i] <= 0.25 || (distIntersec[i] <= (*minVal * 1.5) && distIntersec[i] <= 0.4) ||
+		   (distEuclidean[i] >= (*maxVal * 0.85) && distEuclidean[i] >= 0.9) || distEuclidean[i] >= 1.5 ) {
+			   window = make_pair(previousPos,i);
+			   thresholdIntersec.push_back(this->calcThresholdIntersection(distIntersec, window));
+			   thresholdEuclidean.push_back(this->calcThresholdEuclidean(distEuclidean, window));
+			   slidingWindow.push_back(window);
+			   previousPos = i+1;
+		   }
+	}
+	if(previousPos < distIntersec.size() && i <= distIntersec.size() && slidingWindow.size() > 0) {
+		window = make_pair(previousPos,i);
+		thresholdIntersec.push_back(this->calcThresholdIntersection(distIntersec, window));
+		thresholdEuclidean.push_back(this->calcThresholdEuclidean(distEuclidean, window));
+		slidingWindow.push_back(window);
+	} else if (slidingWindow.size() == 0) {
+		window = make_pair(0,distIntersec.size()-1);
+		thresholdIntersec.push_back(this->calcThresholdIntersection(distIntersec, window));
+		thresholdEuclidean.push_back(this->calcThresholdEuclidean(distEuclidean, window));
+		slidingWindow.push_back(window);
+	}
+	
+	/* Do the shot segmentation for each sliding window */
+	vector< pair<int,int> > shots;
+	for(int i = 0; i < slidingWindow.size(); i++) {
+		vector< pair<int,int> > temp = this->segmentSlidingWindows(distEuclidean, distIntersec, thresholdIntersec[i], thresholdEuclidean[i], slidingWindow[i]);
+		shots.insert(shots.end(), temp.begin(), temp.end());
+	}
+	
+	/* Remove all shots with a duration of 1 frame or less */
+	for(int i = 0; i < shots.size(); i++) {
+		if(shots[i].second - shots[i].first <= 1) {
+			shots.erase(shots.begin() + i);
+			i--;
+		}
+	}
+	
+	/* Increase all values by 1. The first frame should begin with 1 :) */
+	for(int i = 0; i < shots.size(); i++) {
+		shots[i] = make_pair(shots[i].first+1, shots[i].second+1);
+	}
+
+	return shots;
+}
