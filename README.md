@@ -6,8 +6,7 @@ FAST (**FA**st **S**hot segmen**T**ation) is a simple and fast video shot segmen
 *   A functional OpenCV installation (version 2.4.x and above)
 *   An appropriate set of CODECs
 
-# Usage
-FAST has only two parameters:
+# Parameters
 1.  The video which will be segmented.
 2.  A file path to the CSV output which describes the shots found.
 
@@ -21,7 +20,7 @@ If FAST detects a gradual transition such swipe, fade in/out or other transition
 	
 ...represents two shots (87213 to 87311 and 87339 to 87390) and a gradual transition (87312 to 87338).
 
-The last video frame can be ignored in some cases. In other words, the last shot may lacks one frame.
+The last video frame can be ignored in some cases.
 
 # Example
 	$ ./FAST video.avi shots.csv
@@ -36,7 +35,7 @@ The last video frame can be ignored in some cases. In other words, the last shot
 # Publications
 FAST was mentioned, described or used in the following publications:
 	
-Trojahn, T. H. (2014). Automatic scenes video segmentation based on shot coherence (Master's dissertation, Universidade de São Paulo, São Carlos, Brasil). Retrieved from [http://www.teses.usp.br/teses/disponiveis/55/55134/tde-20052014-152446/] (In portuguese).
+Trojahn, T. H. (2014). Automatic scenes video segmentation based on shot coherence (Master's dissertation, Universidade de São Paulo, São Carlos, Brasil). Retrieved from [http://www.teses.usp.br/teses/disponiveis/55/55134/tde-20052014-152446/]. (In portuguese).
 
 # Authors
 FAST was developed by Tiago H. Trojahn under the coordination of Rudinei Goularte
