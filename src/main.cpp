@@ -42,10 +42,15 @@ int main(int argc, char* argv[]) {
 		cout << "The videoFilePath seems to be invalid or cannot be read" << endl;
 		return 1;
 	}
-	if(!Utils::checkOutputFile(outputPath)) {
-		cout << "The outputFilePath seems to be invalid or cannot be written" << endl;
+	if(Utils::checkFile(outputPath)) {
+		cout << "The outputFilePath already exists!" << endl;
 		return 1;
-	}
+	} else {
+		if(!Utils::checkOutputFile(outputPath)) {
+			cout << "The outputFilePath seems to be invalid or cannot be written" << endl;
+			return 1;
+		}
+	}	
 	vector<Mat> histograms = extractVideoHistograms(videoPath);
 	
 	ShotSegmentation ss(histograms, 3, 0.5, 9);
