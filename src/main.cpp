@@ -33,7 +33,8 @@ vector<Mat> extractVideoHistograms(string videoPath) {
 
 int main(int argc, char* argv[]) {
 	if(argc != 3) {
-		cout << "Incorrect parameter count. Please, use './FAST <videoFilePath> <outputFilePath>'" << endl;
+		cout << "Incorrect parameter count." << endl;
+		cout << "Please, use './FAST <videoFilePath> <outputFilePath>'" << endl;
 		return 1;
 	}
 	string videoPath = string(argv[1]);
@@ -42,9 +43,18 @@ int main(int argc, char* argv[]) {
 		cout << "The videoFilePath seems to be invalid or cannot be read" << endl;
 		return 1;
 	}
-	if(Utils::checkFile(outputPath)) {
-		cout << "The outputFilePath already exists!" << endl;
-		return 1;
+	if(Utils::checkFile(outputPath)) {		
+		while(true) {
+			string in;
+			cout << "File '" << outputPath << "' already exists. Overwrite ? [y/N]" << endl;
+			getline(std::cin,in);
+			if(in == "Y" || in == "y") {
+				break;
+			}
+			if(in == "" || in == "N" || in == "n") {
+				return 1;
+			}
+		}
 	} else {
 		if(!Utils::checkOutputFile(outputPath)) {
 			cout << "The outputFilePath seems to be invalid or cannot be written" << endl;
