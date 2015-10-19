@@ -16,18 +16,25 @@ using namespace cv;
 vector<Mat> extractVideoHistograms(string videoPath) {
 	vector<Mat> histograms;
 	Mat frame;
-	VideoCapture capture(videoPath);
+	try {	
+		VideoCapture capture(videoPath);
 	
-	while(true) {
-		bool temp = capture.read(frame);
-		if(!temp) {
-			break;
+		while(true) {
+			bool temp = capture.read(frame);
+			if(!temp) {
+				break;
+			}
+			cvtColor(frame,frame,CV_BGR2HSV);
+			histograms.push_back(Utils::extractHistogram(frame));
 		}
-		cvtColor(frame,frame,CV_BGR2HSV);
-		histograms.push_back(Utils::extractHistogram(frame));
+		frame.release();
+		capture.release();
+		
+	} catch(exception &e) {
+		cout << "The video file is corrupt or of an unsupported format" << endl;
+		exit(1);
 	}
-	frame.release();
-	capture.release();
+
 	return histograms;	
 }
 
