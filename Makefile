@@ -9,11 +9,8 @@ all: $(PROG)
 $(PROG): $(OBJS)
 	$(CXX) $(CPPFLAGS) $(OBJS) src/main.cpp -o $@ $(LDLIBS)
 
-Utils.o: src/Utils.cpp src/Utils.hpp
-	$(CXX) $(CPPFLAGS) -c src/Utils.cpp -o $@
-	
-ShotSegmentation.o: src/ShotSegmentation.cpp src/ShotSegmentation.hpp
-	$(CXX) $(CPPFLAGS) -c src/ShotSegmentation.cpp -o $@
+%.o: src/%.cpp
+	$(CXX) $(CPPFLAGS) -c -o $@ $<
 	
 clean:
 	@rm -f $(PROG) *.o
