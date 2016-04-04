@@ -1,20 +1,19 @@
-CC = g++ -std=c++11
-UTILSHPP = src/Utils.hpp
-UTILSCPP = src/Utils.cpp
-SHOTHPP = src/ShotSegmentation.hpp
-SHOTCPP = src/ShotSegmentation.cpp
-LIBS = `pkg-config --libs --cflags opencv`
+CPPFLAGS := -O2 -g -std=c++11 -pthread -Wl,--no-as-needed
+LDLIBS := `pkg-config --libs --cflags opencv`
+OBJS = Utils.o ShotSegmentation.o
+PROG = FAST
+CXX = g++
 
-all: FAST
+all: $(PROG)
 
-Utils.o: $(UTILSHPP) $(UTILSCPP)
-	@$(CC) -o src/$@ -c $(UTILSCPP)
+$(PROG): $(OBJS)
+	$(CXX) $(CPPFLAGS) $(OBJS) src/main.cpp -o $@ $(LDLIBS)
+
+Utils.o: src/Utils.cpp src/Utils.hpp
+	$(CXX) $(CPPFLAGS) -c src/Utils.cpp -o $@
 	
-ShotSegmentation.o: $(SHOTHPP) $(SHOTCPP)
-	@$(CC) -o src/$@ -c $(SHOTCPP)
-
-FAST: src/Utils.o src/ShotSegmentation.o src/main.cpp
-	@$(CC) src/main.cpp src/Utils.o src/ShotSegmentation.o -o FAST $(LIBS)
-
+ShotSegmentation.o: src/ShotSegmentation.cpp src/ShotSegmentation.hpp
+	$(CXX) $(CPPFLAGS) -c src/ShotSegmentation.cpp -o $@
+	
 clean:
-	@rm -f FAST src/*.o
+	@rm -f $(PROG) *.o
