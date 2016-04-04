@@ -5,14 +5,21 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <thread>
+#include <mutex>
 
 using namespace std;
 using namespace cv;
 
 class Utils {
-	public:
-		static Mat extractHistogram(Mat frame);
+	private:
+		static void extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp);
+		static std::mutex mutex;
+	
+	public:		
 		static void writeOutputFile(string outFile, vector< pair<int,int> > shots);
 		static bool checkFile(string name);
 		static bool checkOutputFile(string name);
+		static vector<Mat> extractVideoHistograms(string videoPath);
+		static bool pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem);
 };

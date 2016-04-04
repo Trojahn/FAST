@@ -10,33 +10,9 @@
 #include <utility>
 #include <algorithm>
 
+
 using namespace std;
 using namespace cv;
-
-vector<Mat> extractVideoHistograms(string videoPath) {
-	vector<Mat> histograms;
-	Mat frame;
-	try {	
-		VideoCapture capture(videoPath);
-	
-		while(true) {
-			bool temp = capture.read(frame);
-			if(!temp) {
-				break;
-			}
-			cvtColor(frame,frame,CV_BGR2HSV);
-			histograms.push_back(Utils::extractHistogram(frame));
-		}
-		frame.release();
-		capture.release();
-		
-	} catch(exception &e) {
-		cout << "The video file is corrupt or of an unsupported format" << endl;
-		exit(1);
-	}
-
-	return histograms;	
-}
 
 int main(int argc, char* argv[]) {
 	if(argc != 3) {
@@ -68,7 +44,7 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 	}	
-	vector<Mat> histograms = extractVideoHistograms(videoPath);
+	vector<Mat> histograms = Utils::extractVideoHistograms(videoPath);
 	
 	ShotSegmentation ss(histograms, 3, 0.5, 9);
 	vector< pair<int,int> > shots = ss.segment();

@@ -1,6 +1,10 @@
 #include "Utils.hpp"
 
-Mat Utils::extractHistogram(Mat frame){
+std::mutex Utils::mutex;
+
+void Utils::extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp){
+	cvtColor(frame,frame,CV_BGR2HSV);
+	
 	float Hsize[] = {0,180};
 	float Ssize[] = {0,256};
 	float Vsize[] = {0,256};
@@ -14,8 +18,11 @@ Mat Utils::extractHistogram(Mat frame){
 
 	calcHist(&frame,1,channels,Mat(),histogram,3,histogramBins,space);
 	histogram = histogram / cv::sum(histogram)[0];
-
-	return histogram;
+	frame.release();
+	
+	Utils::mutex.lock();
+	hTemp.push_back(make_pair(num,histogram));
+	Utils::mutex.unlock();
 }
 
 void Utils::writeOutputFile(string outFile, vector< pair<int,int> > shots) {
@@ -40,4 +47,55 @@ bool Utils::checkOutputFile(string name) {
 		return true;
 	}
 	return false;	
+}
+
+bool Utils::pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem) {
+	return fElem.first < sElem.first;
+}
+
+vector<Mat> Utils::extractVideoHistograms(string videoPath) {
+	vector< pair<int, Mat> > hTemp;
+	unsigned nThreads = thread::hardware_concurrency();
+	vector<thread> pool;
+		
+	int num = 0;
+	Mat frame;
+	try {	
+		VideoCapture capture(videoPath);
+	
+		while(true) {
+			bool temp = capture.read(frame);
+			if(!temp) {
+				break;
+			}
+			if(pool.size() >= nThreads) {
+				for(int i = 0; i < pool.size(); i++) {
+					pool[i].join();
+				}
+				pool.clear();
+			}
+			Mat fTemp;
+			frame.copyTo(fTemp);
+			pool.push_back(thread(&Utils::extractHistogram, fTemp, num, std::ref(hTemp)));			
+			num++;
+		}
+		for(int i = 0; i < pool.size(); i++) {
+			pool[i].join();
+		}
+		pool.clear();
+		frame.release();
+		capture.release();		
+	} catch(exception &e) {
+		cout << "The video file is corrupt or of an unsupported format" << endl;
+		exit(1);
+	}
+
+	std::sort(hTemp.begin(), hTemp.end(), Utils::pairCompare);
+	
+	vector<Mat> histograms;
+	for(pair<int, Mat> t : hTemp) {
+		histograms.push_back(t.second);
+	}
+
+	return histograms;	
 }
