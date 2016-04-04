@@ -2,7 +2,7 @@
 FAST (**FA**st **S**hot segmen**T**ation) is a simple and fast video shot segmentation application. Just provide a input video and enjoy!
 
 # Requirements
-*   A C++ compiler, like g++
+*   A C++11 compiler, like g++
 *   A functional OpenCV installation (version 2.4.x and above)
 *   An appropriate set of CODECs
 
