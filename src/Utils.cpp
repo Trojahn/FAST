@@ -55,32 +55,28 @@ bool Utils::pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem
 
 vector<Mat> Utils::extractVideoHistograms(string videoPath) {
 	vector< pair<int, Mat> > hTemp;
-	unsigned nThreads = thread::hardware_concurrency();
+	// Each threads will be real fast...
+	unsigned nThreads = thread::hardware_concurrency() * 100;
 	vector<thread> pool;
-		
-	int num = 0;
-	Mat frame;
+
 	try {	
+		Mat frame;
 		VideoCapture capture(videoPath);
-	
-		while(true) {
-			bool temp = capture.read(frame);
-			if(!temp) {
-				break;
-			}
-			if(pool.size() >= nThreads) {
-				for(int i = 0; i < pool.size(); i++) {
-					pool[i].join();
+		
+		for(int num = 0; capture.read(frame); num++) {
+			if(pool.size() > nThreads) {
+				for(auto &t : pool) {
+					t.join();
 				}
 				pool.clear();
 			}
 			Mat fTemp;
 			frame.copyTo(fTemp);
-			pool.push_back(thread(&Utils::extractHistogram, fTemp, num, std::ref(hTemp)));			
-			num++;
+			pool.push_back(thread(&Utils::extractHistogram, fTemp, num, std::ref(hTemp)));	
 		}
-		for(int i = 0; i < pool.size(); i++) {
-			pool[i].join();
+		
+		for(auto &t : pool) {
+			t.join();
 		}
 		pool.clear();
 		frame.release();

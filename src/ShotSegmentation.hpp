@@ -23,7 +23,8 @@ class ShotSegmentation {
 		bool heuristicEuclidean(vector<double> distances, int pos, double threshold);
 		bool heuristicIntersec(vector<double> distances, int pos, double threshold);
 		vector< pair<int,int> > segmentSlidingWindows(vector<double> distEuclidean, vector<double> distIntersec,
-								 double thresholdIntersec, double thresholdEuclidean, pair<int,int> window);
+		double thresholdIntersec, double thresholdEuclidean, pair<int,int> window);
+		
 
 	public:
 		ShotSegmentation(vector<Mat> histograms, int heuristicThreshold, double intersectionThreshold, double euclideanThreshold);

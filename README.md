@@ -35,10 +35,10 @@ The last video frame can be ignored in some cases.
 # Publications
 FAST was mentioned, described or used in the following publications:
 	
-Trojahn, T. H., 2014. *Automatic scenes video segmentation based on shot coherence*. M.S. thesis. Universidade de São Paulo. Avaliable in http://www.teses.usp.br/teses/disponiveis/55/55134/tde-20052014-152446/. (In portuguese).
+Trojahn, T. H., 2014. *Automatic video scene segmentation based on shot coherence*. M.S. thesis. Universidade de São Paulo. Avaliable in http://www.teses.usp.br/teses/disponiveis/55/55134/tde-20052014-152446/. (In portuguese).
 
-# Authors
-FAST was developed by Tiago H. Trojahn under the coordination of Rudinei Goularte
+# About
+FAST was developed by Tiago H. Trojahn under the coordination of Rudinei Goularte.
 
 
 
