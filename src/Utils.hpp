@@ -8,11 +8,9 @@
 #include <thread>
 #include <mutex>
 #include <cmath>
-#include "concurrentqueue.h"
 
 using namespace std;
 using namespace cv;
-using namespace moodycamel;
 
 class Utils {
 	private:
@@ -24,6 +22,5 @@ class Utils {
 		static bool checkFile(string name);
 		static bool checkOutputFile(string name);
 		static vector<Mat> extractVideoHistograms(string videoPath);
-		static vector<Mat> extractVideoHistograms2(string videoPath);
 		static bool pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem);
 };
