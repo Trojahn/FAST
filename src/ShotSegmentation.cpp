@@ -43,41 +43,24 @@ double ShotSegmentation::histogramIntersectionDistance(Mat histogram1, Mat histo
 }
 
 double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pair<int,int> window) {
-	double maxVal, minVal, avgVal;
+	double avg = 0.0;
 	
-	maxVal = distances[window.first];
-	minVal = distances[window.first];
-	avgVal = distances[window.first];
-	
-	for(int i = window.first+1; i < window.second; i++) {
-		maxVal = max(maxVal,distances[i]);
-		minVal = min(minVal,distances[i]);
-		avgVal = avgVal + distances[i];
+	for(int i = window.first; i < window.second; i++) {
+		avg = avg + distances[i];
 	}
-	avgVal = avgVal / (double) (window.second - window.first);
-	if(minVal * 1.15 >= avgVal && avgVal >= maxVal * 0.95) {
-		return 0.4;
-	}
-	return avgVal * this->swIntersectThreshold;
+	avg = avg / (double) (window.second - window.first);
+
+	return avg * this->swIntersectThreshold;
 }
 
 double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
-	double maxVal, minVal, avgVal;
+	double avg = 0.0;
 	
-	maxVal = distances[window.first];
-	minVal = distances[window.first];
-	avgVal = distances[window.first];
-	
-	for(int i = window.first+1; i < window.second; i++) {
-		maxVal = max(maxVal,distances[i]);
-		minVal = min(minVal,distances[i]);
-		avgVal = avgVal + distances[i];
+	for(int i = window.first; i < window.second; i++) {
+		avg = avg + distances[i];
 	}
-	avgVal = avgVal / (double) (window.second - window.first);
-	if(minVal * 1.5 >= avgVal && avgVal >= maxVal * 0.75) {
-		return 1;
-	}
-	return avgVal * this->swEuclideanThreshold;
+	avg = avg / (double) (window.second - window.first);
+	return avg * this->swEuclideanThreshold;
 }
 
 bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {

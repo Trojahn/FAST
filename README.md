@@ -6,14 +6,20 @@ FAST (**FA**st **S**hot segmen**T**ation) is a simple and fast video shot segmen
 *   A functional OpenCV installation (version 2.4.x and above)
 *   An appropriate set of CODECs
 
-# Parameters
-1.  The video which will be segmented.
-2.  A file path to the CSV output which describes the shots found.
+# Arguments
+	./FAST <videoFilePath> <outputFilePath> [Options]
+The available options are (if any are specified, all the values must be specified):
+- Gradual heuristic strenght. Merge consecutive transitions found with distance up to the specified value. Zero disables it. Valid values are [0 ~ N] (Default: 3)
+- The histogram intersection value which identifies a sliding windows transition. Also a shot transtion. Valid values are [0.01 ~ 0.99] (Default: 0.25).
+- The euclidean distance value which identifies a sliding windows transition. Also a shot transtion. Valid values are [0.01 ~ 1.99] (Default: 1.5).
+- A multiplier value applied to the average histogram intersection value within each local sliding windows to detect subtle transitions. Valid values are [0.01 ~ N] (Default: 0.5)
+- A multiplier value applied to the average euclidean distance value within each local sliding windows to detect subtle transitions. Valid values are [0.01 ~ N] (Default: 9.00)
+
 
 # Output
 FAST will save it's output into a CSV file (the second provided parameter). In this file, each line corresponds to a detected shot and each number to the corresponding *start,end* of the shot. The first frame is represented by '1'.
 
-If FAST detects a gradual transition such swipe, fade in/out or other transition effect, the corresponding frames are discarted of the output CSV. For example, the following snippet...
+If FAST detects a gradual transition such as swipe, fade in/out or other transition effect, the corresponding frames are discarted of the output CSV. For example, the following snippet...
 
 	87213,87311
 	87339,87390
@@ -33,7 +39,7 @@ The last video frame can be ignored in some cases.
 		326,700
 
 # Publications
-FAST was mentioned, described or used in the following publications:
+FAST was mentioned, described or used in the following publications/software:
 	
 Trojahn, T. H., 2014. *Automatic video scene segmentation based on shot coherence*. M.S. thesis. Universidade de São Paulo. Avaliable in http://www.teses.usp.br/teses/disponiveis/55/55134/tde-20052014-152446/. (In portuguese).
 
