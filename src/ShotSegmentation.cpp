@@ -1,10 +1,27 @@
 #include "ShotSegmentation.hpp"
 
-ShotSegmentation::ShotSegmentation(vector<Mat> histograms, int heuristicThreshold, double intersectionThreshold, double euclideanThreshold) {
+ShotSegmentation::ShotSegmentation(vector<Mat> histograms) {
 	this->histograms = histograms;
-	this->intersectionThreshold = intersectionThreshold;
-	this->euclideanThreshold = euclideanThreshold;
-	this->heuristicThreshold = heuristicThreshold;
+}
+
+void ShotSegmentation::setGradualThreshold(int value) {
+	this->gradualHeuristicThreshold = value;
+}
+
+void ShotSegmentation::setSlidingWindowsIntersect(float value) {
+	this->swIntersectThreshold = value;
+}
+
+void ShotSegmentation::setSlidingWindowsEuclidean(float value) {
+	this->swEuclideanThreshold = value;
+}
+
+void ShotSegmentation::setLocalSlidingWindowIntersect(float value) {
+	this->localSlidingWindowIntersectThreshold = value;
+}
+
+void ShotSegmentation::setLocalSlidingWindowEuclidean(float value) {
+	this->localSlidingWindowEuclideanThreshold = value;
 }
 
 double ShotSegmentation::histogramEuclideanDistance(Mat histogram1, Mat histogram2) {
@@ -41,7 +58,7 @@ double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pai
 	if(minVal * 1.15 >= avgVal && avgVal >= maxVal * 0.95) {
 		return 0.4;
 	}
-	return avgVal * intersectionThreshold;
+	return avgVal * this->swIntersectThreshold;
 }
 
 double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
@@ -60,11 +77,11 @@ double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<i
 	if(minVal * 1.5 >= avgVal && avgVal >= maxVal * 0.75) {
 		return 1;
 	}
-	return avgVal * euclideanThreshold;
+	return avgVal * this->swEuclideanThreshold;
 }
 
 bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {
-	for(int i = pos; i < pos+this->heuristicThreshold && i < distances.size(); i++) {
+	for(int i = pos; i < pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
 		if(distances[i] < threshold) {
 			return true;
 		}
@@ -73,7 +90,7 @@ bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, doub
 }
 
 bool ShotSegmentation::heuristicEuclidean(vector<double> distances, int pos, double threshold) {
-	for(int i = pos; i < pos+this->heuristicThreshold && i < distances.size(); i++) {
+	for(int i = pos; i < pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
 		if(distances[i] > threshold) {
 			return true;
 		}
@@ -125,8 +142,8 @@ vector< pair<int,int> > ShotSegmentation::segment() {
 	/* Generate the sliding windows and its threholds */
 	int i;
 	for(i = 0; i < distIntersec.size(); i++) {
-		if(distIntersec[i] <= 0.25 || (distIntersec[i] <= (*minVal * 1.5) && distIntersec[i] <= 0.4) ||
-		   (distEuclidean[i] >= (*maxVal * 0.85) && distEuclidean[i] >= 0.9) || distEuclidean[i] >= 1.5 ) {
+		if(distIntersec[i] <= this->swIntersectThreshold || (distIntersec[i] <= (*minVal * 1.5) && distIntersec[i] <= 0.4) ||
+		   (distEuclidean[i] >= (*maxVal * 0.85) && distEuclidean[i] >= 0.9) || distEuclidean[i] >= this->swEuclideanThreshold ) {
 			   window = make_pair(previousPos,i);
 			   thresholdIntersec.push_back(this->calcThresholdIntersection(distIntersec, window));
 			   thresholdEuclidean.push_back(this->calcThresholdEuclidean(distEuclidean, window));

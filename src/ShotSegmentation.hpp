@@ -12,9 +12,14 @@ using namespace cv;
 class ShotSegmentation {
 	private:
 		vector<Mat> histograms;
-		double intersectionThreshold;
-		double euclideanThreshold;
-		int heuristicThreshold;
+		
+		/* Shot segmentation thresholds */
+		int gradualHeuristicThreshold;
+		float swIntersectThreshold;
+		float swEuclideanThreshold;
+		float localSlidingWindowIntersectThreshold;
+		float localSlidingWindowEuclideanThreshold;
+		
 		/* Methods */
 		double histogramEuclideanDistance(Mat histogram1, Mat histogram2);
 		double histogramIntersectionDistance(Mat histogram1, Mat histogram2);
@@ -27,6 +32,14 @@ class ShotSegmentation {
 		
 
 	public:
-		ShotSegmentation(vector<Mat> histograms, int heuristicThreshold, double intersectionThreshold, double euclideanThreshold);
+		ShotSegmentation(vector<Mat> histograms);
 		vector< pair<int,int> > segment();
+		
+		/* Setter methods */
+		void setGradualThreshold(int value);
+		void setSlidingWindowsIntersect(float value);
+		void setSlidingWindowsEuclidean(float value);
+		void setLocalSlidingWindowIntersect(float value);
+		void setLocalSlidingWindowEuclidean(float value);
+		
 };
