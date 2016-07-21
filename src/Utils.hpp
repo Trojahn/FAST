@@ -3,7 +3,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
 #include <fstream>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <thread>
 #include <mutex>

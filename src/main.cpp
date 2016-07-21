@@ -47,6 +47,8 @@ int main(int argc, char* argv[]) {
 		if(!Utils::checkOutputFile(outputPath)) {
 			cout << "The outputFilePath seems to be invalid or cannot be written" << endl;
 			return 1;
+		} else {
+			std::remove(outputPath.c_str());
 		}
 	}
 	
@@ -106,20 +108,22 @@ int main(int argc, char* argv[]) {
 	}
 	// Extract the video histograms
 	vector<Mat> histograms = Utils::extractVideoHistograms(videoPath);
+	if(histograms.size() > 0) {
+		ShotSegmentation ss(histograms);
 	
-		
-	ShotSegmentation ss(histograms);
-	
-	// Seting the needed thresholds.
-	ss.setGradualThreshold(gradualHeuristic);
-	ss.setSlidingWindowsIntersect(swIntersection);
-	ss.setSlidingWindowsEuclidean(swEuclidean);
-	ss.setLocalSlidingWindowIntersect(localSWIntersection);
-	ss.setLocalSlidingWindowEuclidean(localSWEuclidean);
-		
-	// Performing the shotSegmentation
-	vector<pair<int,int>> shots = ss.segment();
-	
-	Utils::writeOutputFile(outputPath, shots);
+		// Seting the needed thresholds.
+		ss.setGradualThreshold(gradualHeuristic);
+		ss.setSlidingWindowsIntersect(swIntersection);
+		ss.setSlidingWindowsEuclidean(swEuclidean);
+		ss.setLocalSlidingWindowIntersect(localSWIntersection);
+		ss.setLocalSlidingWindowEuclidean(localSWEuclidean);
+			
+		// Performing the shotSegmentation
+		vector<pair<int,int>> shots = ss.segment();
+		if(shots.size() > 0) {
+			Utils::writeOutputFile(outputPath, shots);	
+		}		
+	}
+
 	return 0;
 }

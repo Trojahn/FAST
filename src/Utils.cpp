@@ -4,7 +4,7 @@ std::mutex Utils::mutex;
 
 void Utils::extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp){
 	cvtColor(frame,frame,CV_BGR2HSV);
-	
+		
 	float Hsize[] = {0,180};
 	float Ssize[] = {0,256};
 	float Vsize[] = {0,256};
@@ -26,7 +26,7 @@ void Utils::extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp
 }
 
 void Utils::writeOutputFile(string outFile, vector< pair<int,int> > shots) {
-	ofstream file (outFile.c_str());
+	fstream file (outFile, ios::out);
 	for(int i = 0; i < shots.size(); i++) {
 		file << shots[i].first << "," << shots[i].second << endl;
 	}
@@ -34,19 +34,21 @@ void Utils::writeOutputFile(string outFile, vector< pair<int,int> > shots) {
 }
 
 bool Utils::checkFile(string name) {
-  if(FILE *file = fopen(name.c_str(),"r")) {
-		fclose(file);
-		return true;
+	fstream file(name, ios::in);
+	if(file.is_open()) {
+		file.close();
+		return true;	
 	}
 	return false;
 }
 
 bool Utils::checkOutputFile(string name) {
-	if(FILE *file = fopen(name.c_str(),"w")) {
-		fclose(file);
-		return true;
+	fstream file(name, ios::out);
+	if(file.is_open()) {
+		file.close();
+		return true;	
 	}
-	return false;	
+	return false;
 }
 
 bool Utils::pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem) {
@@ -55,6 +57,7 @@ bool Utils::pairCompare(const pair<int, Mat> &fElem, const pair<int, Mat> &sElem
 
 vector<Mat> Utils::extractVideoHistograms(string videoPath) {
 	vector< pair<int, Mat> > hTemp;
+	vector<Mat> histograms;
 	// Each threads will be real fast...
 	unsigned nThreads = thread::hardware_concurrency() * 100;
 	vector<thread> pool;
@@ -83,12 +86,10 @@ vector<Mat> Utils::extractVideoHistograms(string videoPath) {
 		capture.release();		
 	} catch(exception &e) {
 		cout << "The video file is corrupt or of an unsupported format" << endl;
-		exit(1);
 	}
 
 	std::sort(hTemp.begin(), hTemp.end(), Utils::pairCompare);
-	
-	vector<Mat> histograms;
+		
 	for(pair<int, Mat> t : hTemp) {
 		histograms.push_back(t.second);
 	}
