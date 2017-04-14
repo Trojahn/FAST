@@ -50,7 +50,7 @@ double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pai
 	}
 	avg = avg / (double) (window.second - window.first);
 
-	return avg * this->swIntersectThreshold;
+	return avg * this->localSlidingWindowIntersectThreshold;
 }
 
 double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
@@ -60,7 +60,7 @@ double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<i
 		avg = avg + distances[i];
 	}
 	avg = avg / (double) (window.second - window.first);
-	return avg * this->swEuclideanThreshold;
+	return avg * this->localSlidingWindowEuclideanThreshold;
 }
 
 bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {
