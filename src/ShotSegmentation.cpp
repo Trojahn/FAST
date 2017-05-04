@@ -50,7 +50,7 @@ double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pai
 	}
 	avg = avg / (double) (window.second - window.first);
 
-	return avg * this->localSlidingWindowIntersectThreshold;
+	return avg * this->swIntersectThreshold;
 }
 
 double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
@@ -60,11 +60,11 @@ double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<i
 		avg = avg + distances[i];
 	}
 	avg = avg / (double) (window.second - window.first);
-	return avg * this->localSlidingWindowEuclideanThreshold;
+	return avg * this->swEuclideanThreshold;
 }
 
 bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {
-	for(int i = pos; i < pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
+	for(int i = pos; i <= pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
 		if(distances[i] < threshold) {
 			return true;
 		}
@@ -73,7 +73,7 @@ bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, doub
 }
 
 bool ShotSegmentation::heuristicEuclidean(vector<double> distances, int pos, double threshold) {
-	for(int i = pos; i < pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
+	for(int i = pos; i <= pos+this->gradualHeuristicThreshold && i < distances.size(); i++) {
 		if(distances[i] > threshold) {
 			return true;
 		}
@@ -82,26 +82,32 @@ bool ShotSegmentation::heuristicEuclidean(vector<double> distances, int pos, dou
 }
 
 vector< pair<int,int> > ShotSegmentation::segmentSlidingWindows(vector<double> distEuclidean, vector<double> distIntersec, double thresholdIntersec, double thresholdEuclidean, pair<int,int> window) {
-	int i, j, ant;
+	int actual, gradual, ant;
 	vector< pair<int,int> > shots;
-	for(ant = window.first, i = window.first, j = 0; i < window.second; i++) {
-		if(distIntersec[i] <= thresholdIntersec || distEuclidean[i] >= thresholdEuclidean) {
-			j++;
+	for(ant = window.first, actual = window.first, gradual = 0; actual < window.second; actual++) {
+		/* The frame is a transition */
+		if(distIntersec[actual] <= thresholdIntersec || distEuclidean[actual] >= thresholdEuclidean) {
+			gradual++;
 		} else {
-			if (j > 0) {
-				if(heuristicIntersec(distIntersec, i, thresholdIntersec) || heuristicEuclidean(distEuclidean, i, thresholdEuclidean)) {
-					j++;
+			/* The frame is not a transition, but there was a transition before it */
+			if (gradual > 0) {
+				/* There is a very close frame transition after it*/
+				if(heuristicIntersec(distIntersec, actual, thresholdIntersec) || heuristicEuclidean(distEuclidean, actual, thresholdEuclidean)) {
+					gradual++;
 				} else {
-					if (j >= 1) {
-						shots.push_back(make_pair(ant,i - j));
-						ant = i - j + 1;
-					}
-					j = 0;
+					shots.push_back(make_pair(ant, actual - gradual));
+					/* As this frame is not a transition, it is the begining of a new shot. So reset the relevant values */
+					ant = actual;
+					gradual = 0;
 				}
 			}
 		}
 	}
-	shots.push_back(make_pair(ant,window.second));
+	/* The very last shot of the local is also a shot so add it. But only if its not a part of a gradual transition... */
+	if(shots.size() > 0 && shots[shots.size()-1].second != window.second && gradual == 0) {
+		shots.push_back(make_pair(shots[shots.size()-1].second+1,window.second));
+	}
+
 	return shots;
 }
 
