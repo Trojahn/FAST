@@ -50,7 +50,7 @@ double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pai
 	}
 	avg = avg / (double) (window.second - window.first);
 
-	return avg * this->swIntersectThreshold;
+	return avg * this->localSlidingWindowIntersectThreshold;
 }
 
 double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<int,int> window) {
@@ -60,7 +60,7 @@ double ShotSegmentation::calcThresholdEuclidean(vector<double> distances, pair<i
 		avg = avg + distances[i];
 	}
 	avg = avg / (double) (window.second - window.first);
-	return avg * this->swEuclideanThreshold;
+	return avg * this->localSlidingWindowEuclideanThreshold;
 }
 
 bool ShotSegmentation::heuristicIntersec(vector<double> distances, int pos, double threshold) {
@@ -103,9 +103,13 @@ vector< pair<int,int> > ShotSegmentation::segmentSlidingWindows(vector<double> d
 			}
 		}
 	}
-	/* The very last shot of the local is also a shot so add it. But only if its not a part of a gradual transition... */
+	/* The very last shot of the local window is also a shot so add it. But only if its not a part of a gradual transition... */
 	if(shots.size() > 0 && shots[shots.size()-1].second != window.second && gradual == 0) {
 		shots.push_back(make_pair(shots[shots.size()-1].second+1,window.second));
+	}
+	/* If there isn't a single transition, than add the whole window as a shot */
+	if(shots.size() == 0) {
+		shots.push_back(make_pair(window.first, window.second));
 	}
 
 	return shots;
