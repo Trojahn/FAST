@@ -16,13 +16,13 @@ using namespace cv;
 
 int main(int argc, char* argv[]) {
 	if(argc < 3) {
-		cout << "./FAST <videoFilePath> <outputFilePath> [Options]" << endl;
+		cout << "./FAST videoFilePath outputFilePath [ght [hiv [hev [eav [iav]]]]]" << endl;
 		cout << "Options:" << endl;
-		cout << "- Gradual heuristic strenght. Merge consecutive transitions found with distance up to the specified value. Zero disables it. [0 ~ N] (Default: 3)" << endl;
-		cout << "- The histogram intersection value which identifies a sliding windows transition. Also a shot transtion. [0.01 ~ 0.99] (Default: 0.25)." << endl;
-		cout << "- The euclidean distance value which identifies a sliding windows transition. Also a shot transtion. [0.01 ~ 1.99] (Default: 1.5)." << endl;
-		cout << "- A multiplier value applied to the average histogram intersection value within each local sliding windows to detect subtle transitions. [0.01 ~ N] (Default: 0.5)" << endl;
-		cout << "- A multiplier value applied to the average euclidean distance value within each local sliding windows to detect subtle transitions. [0.01 ~ N] (Default: 9.00)" << endl;
+		cout << "ght : Gradual heuristic strenght. Merge consecutive transitions found with distance up to the specified value. Zero disables it. [0 ~ N] (Default: 3)" << endl;
+		cout << "hiv : The histogram intersection value which identifies a sliding windows transition. Also a shot transtion. [0.01 ~ 0.99] (Default: 0.25)." << endl;
+		cout << "hev : The histogram euclidean distance value which identifies a sliding windows transition. Also a shot transtion. [0.01 ~ 1.99] (Default: 1.5)." << endl;
+		cout << "eav : A multiplier value applied to the average histogram intersection value within each local sliding windows to detect subtle transitions. [0.01 ~ N] (Default: 0.5)" << endl;
+		cout << "isv : A multiplier value applied to the average histogram euclidean distance value within each local sliding windows to detect subtle transitions. [0.01 ~ N] (Default: 9.00)" << endl;
 		return 0;
 	}
 	string videoPath = string(argv[1]);
@@ -58,14 +58,19 @@ int main(int argc, char* argv[]) {
 	float localSWIntersection = 0.5;
 	float localSWEuclidean = 9.0;	
 	
-	if(argc > 3) {
+	
+	try {
 		try {
-			try {
+			/* ght heuristics value */
+			if(argc > 3) {
 				gradualHeuristic = stoi(string(argv[3]));
 				if(gradualHeuristic < 0) {
 					gradualHeuristic = 0;
-				}				
-				
+				}
+			}
+
+			/* hiv value */	
+			if(argc > 4) {
 				swIntersection = stof(string(argv[4]));
 				if(swIntersection < 0.01) {
 					swIntersection = 0.01;
@@ -74,7 +79,10 @@ int main(int argc, char* argv[]) {
 						swIntersection = 0.99;
 					}
 				}
-				
+			}
+			
+			/* hev value */
+			if(argc > 5) {
 				swEuclidean = stof(string(argv[5]));
 				if(swEuclidean < 0.01) {
 					swEuclidean = 0.01;
@@ -83,29 +91,38 @@ int main(int argc, char* argv[]) {
 						swEuclidean = 1.99;
 					}
 				}
-				
+			}
+
+			
+			/* eav value */
+			if(argc > 6) {
 				localSWIntersection = stof(string(argv[6]));
 				if(localSWIntersection < 0.01) {
 					localSWIntersection = 0.01;
 				}
-				
+			}
+			/* iav value */
+			if(argc > 7) {
 				localSWEuclidean = stof(string(argv[7]));
 				if(localSWEuclidean < 0.01) {
 					localSWEuclidean = 0.01;
-				}				
-				
-			} catch(out_of_range& oor) {
-				cout << "Out of range error!" << endl;
-				throw;
-			} catch(invalid_argument& ia) {
-				cout << "Invalid argument!" << endl;
-				throw;
-			}
-		} catch (exception &e) {
-			cout << "Some of the options were invalid. Exiting." << endl;
-			return 1;
-		}		
-	}
+				}
+			}				
+			
+		} catch(out_of_range& oor) {
+			cout << "Out of range error!" << endl;
+			throw;
+		} catch(invalid_argument& ia) {
+			cout << "Invalid argument!" << endl;
+			throw;
+		}
+	} catch (exception &e) {
+		cout << "Some of the options were invalid. Exiting." << endl;
+		return 1;
+	}	
+
+
+
 	// Extract the video histograms
 	vector<Mat> histograms = Utils::extractVideoHistograms(videoPath);
 	if(histograms.size() > 0) {

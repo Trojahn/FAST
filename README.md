@@ -6,14 +6,15 @@ FAST (**FA**st **S**hot segmen**T**ation) is a simple and fast video shot segmen
 *   A functional OpenCV installation (version 2.4.x and above)
 *   An appropriate set of CODECs
 
+
 # Arguments
-	./FAST <videoFilePath> <outputFilePath> [Options]
-The available options are (if any are specified, all the values must be specified):
-- Gradual heuristic strenght. Merge consecutive transitions found with distance up to the specified value. Zero disables it. Valid values are \[0 ~ N\] (Default: 3)
-- The histogram intersection value which identifies a sliding windows transition. Also a shot transtion. Valid values are \[0.01 ~ 0.99\] (Default: 0.25).
-- The euclidean distance value which identifies a sliding windows transition. Also a shot transtion. Valid values are \[0.01 ~ 1.99\] (Default: 1.5).
-- A multiplier value applied to the average histogram intersection value within each local sliding windows to detect subtle transitions. Valid values are \[0.01 ~ N\] (Default: 0.5)
-- A multiplier value applied to the average euclidean distance value within each local sliding windows to detect subtle transitions. Valid values are \[0.01 ~ N\] (Default: 9.00)
+	./FAST videoFilePath outputFilePath [ght [hiv [hev [eav [iav]]]]]
+The optional parameters are :
+- ght : Gradual heuristic strenght. Merge consecutive transitions found with distance up to the specified value. Zero disables it. \[0 ~ N]\ (Default: 3).
+- hiv : The histogram intersection value which identifies a sliding windows transition. Also a shot transtion. \[0.01 ~ 0.99\] (Default: 0.25).
+- hev : The histogram euclidean distance value which identifies a sliding windows transition. Also a shot transtion. \[0.01 ~ 1.99\] (Default: 1.5).
+- eav : A multiplier value applied to the average histogram intersection value within each local sliding windows to detect subtle transitions. \[0.01 ~ N]\ (Default: 0.5)
+- isv : A multiplier value applied to the average histogram euclidean distance value within each local sliding windows to detect subtle transitions. \[0.01 ~ N\] (Default: 9.00).
 
 
 # Output
