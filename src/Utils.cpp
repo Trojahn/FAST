@@ -2,8 +2,8 @@
 
 std::mutex Utils::mutex;
 
-void Utils::extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp){
-	cvtColor(frame,frame,CV_BGR2HSV);
+void Utils::extractHistogram(Mat frame, int num, vector< pair<int, Mat> > &hTemp){	
+	cvtColor(frame,frame,COLOR_BGR2HSV);
 		
 	float Hsize[] = {0,180};
 	float Ssize[] = {0,256};

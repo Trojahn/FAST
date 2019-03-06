@@ -3,7 +3,7 @@ FAST (**FA**st **S**hot segmen**T**ation) is a simple and fast video shot segmen
 
 # Requirements
 *   A C++11 compiler, like g++
-*   A functional OpenCV installation (version 2.4.x and above)
+*   A functional OpenCV installation (version 4.x and above, built using 'OPENCV_GENERATE_PKGCONFIG=YES')
 *   An appropriate set of CODECs
 
 

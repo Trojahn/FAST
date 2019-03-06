@@ -39,7 +39,7 @@ double ShotSegmentation::histogramEuclideanDistance(Mat histogram1, Mat histogra
 }
 
 double ShotSegmentation::histogramIntersectionDistance(Mat histogram1, Mat histogram2) {
-	return compareHist(histogram1, histogram2, CV_COMP_INTERSECT);
+	return compareHist(histogram1, histogram2, HISTCMP_INTERSECT);
 }
 
 double ShotSegmentation::calcThresholdIntersection(vector<double> distances, pair<int,int> window) {
